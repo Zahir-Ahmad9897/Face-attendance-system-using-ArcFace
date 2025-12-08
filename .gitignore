@@ -99,8 +99,10 @@ logs/
 *.onnx
 *.tflite
 *.pb
+*.npz
 face_models/*.tflite
 face_models/*.h5
+face_models/*.npz
 
 # Temporary Files
 tmp/
