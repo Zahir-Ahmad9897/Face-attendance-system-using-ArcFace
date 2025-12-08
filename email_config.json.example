@@ -1,0 +1,7 @@
+{
+  "sender_email": "your-email@gmail.com",
+  "app_password": "your-app-password-here",
+  "teacher_email": "teacher@example.com",
+  "send_time": "17:00",
+  "enabled": false
+}

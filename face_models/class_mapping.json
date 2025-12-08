@@ -1,0 +1,12 @@
+{
+  "class_to_idx": {
+    "mehran": 0,
+    "yousaf": 1,
+    "zahir": 2
+  },
+  "idx_to_class": {
+    "0": "mehran",
+    "1": "yousaf",
+    "2": "zahir"
+  }
+}

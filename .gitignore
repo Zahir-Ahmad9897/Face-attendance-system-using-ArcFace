@@ -1,0 +1,153 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+venv_name/
+ENV/
+env/
+.venv
+
+# Database Files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+attendance.db
+*.backup
+
+# Sensitive Configuration Files
+email_config.json
+config.json
+secrets.json
+.env
+.env.local
+
+# Email Attachments & Reports
+*.xlsx
+*.csv
+attendance_report_*.xlsx
+attendance_report_*.csv
+
+# Backup Files
+attendance_backup_*.json
+*.bak
+backup/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Model Files (if large)
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.pb
+face_models/*.tflite
+face_models/*.h5
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# Archive Files
+archive/
+*.zip
+*.tar.gz
+
+# Screenshots & Videos
+screenshots/
+recordings/
+*.mp4
+*.avi
+*.mov
+
+# Node modules (if any frontend build tools)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+*.pyc
+*.pyo
+*.pyd
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Documentation builds
+docs/_build/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/

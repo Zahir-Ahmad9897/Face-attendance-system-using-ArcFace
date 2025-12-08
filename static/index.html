@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/chat.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Hi! I am DOPA</h1>
+                    <p>Your AI Assistant - Real-time Attendance System</p>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="live-clock" id="liveClock">
+                    <div class="clock-label">Current Time</div>
+                    <div class="clock-time">
+                        <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+                    </div>
+                </div>
+
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span id="connectionStatus">System Online</span>
+                </div>
+
+                <button class="btn-email" onclick="openEmailSettings()" title="Email Settings">
+                    <i class="fas fa-envelope"></i>
+                    <span>Email Setup</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon icon-blue">
+                        <i class="fa-solid fa-user-check"></i>
+                    </span>
+                    <button class="btn-icon" title="View Details"><i class="fa-solid fa-ellipsis"></i></button>
+                </div>
+                <div class="stat-value" id="totalPeopleToday">0</div>
+                <div class="stat-label">Present Today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon icon-red">
+                        <i class="fa-solid fa-user-xmark"></i>
+                    </span>
+                </div>
+                <div class="stat-value" id="totalAbsentToday">0</div>
+                <div class="stat-label">Absent Today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon icon-green">
+                        <i class="fa-solid fa-check-double"></i>
+                    </span>
+                </div>
+                <div class="stat-value" id="totalRecordsToday">0</div>
+                <div class="stat-label">Total Check-ins</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon icon-purple">
+                        <i class="fa-solid fa-calendar-day"></i>
+                    </span>
+                </div>
+                <div class="stat-value" id="totalDays">0</div>
+                <div class="stat-label">Active Days</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-icon icon-orange">
+                        <i class="fa-solid fa-clock"></i>
+                    </span>
+                </div>
+                <div class="stat-value" id="lastUpdate">--:--</div>
+                <div class="stat-label">Last Activity</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Attendance Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Attendance Overview</h2>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <!-- View Toggle -->
+                        <div class="view-toggle">
+                            <button class="toggle-btn active" onclick="switchView('grouped')" id="btnGrouped">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>By Day</span>
+                            </button>
+                            <button class="toggle-btn" onclick="switchView('list')" id="btnList">
+                                <i class="fa-solid fa-list"></i>
+                                <span>List View</span>
+                            </button>
+                        </div>
+
+                        <!-- Date Picker -->
+                        <div style="position: relative;">
+                            <input type="date" id="dateFilter"
+                                style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-family: inherit; color: var(--text-main);"
+                                onchange="filterByDate(this.value)">
+                        </div>
+
+                        <!-- Export Button -->
+                        <button class="btn-icon" onclick="exportReport()" title="Export Excel"
+                            style="background: #e0e7ff; color: var(--primary);">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </button>
+
+                        <button class="btn-icon" onclick="refreshData()" title="Refresh Data">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <div id="attendanceContent">
+                        <!-- Table injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <!-- Live Feed -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Arrivals</h2>
+                        <div class="status-pill">Live</div>
+                    </div>
+                    <div class="activity-list" id="peopleContent">
+                        <!-- Activity items injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Absent List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" style="color: var(--danger)">Absent Today</h2>
+                        <div class="status-pill" style="background: #fee2e2; color: var(--danger)">Missing</div>
+                    </div>
+                    <div class="activity-list" id="absentContent">
+                        <!-- Absent items injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Configuration Modal -->
+        <div class="modal-overlay" id="emailModalOverlay" onclick="closeEmailSettings()"></div>
+        <div class="email-modal" id="emailModal">
+            <div class="modal-header">
+                <h2><i class="fas fa-envelope"></i> Email Configuration</h2>
+                <button class="modal-close" onclick="closeEmailSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="config-status" id="configStatus">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Loading configuration...</span>
+                </div>
+
+                <form id="emailConfigForm" onsubmit="saveEmailConfig(event)">
+                    <div class="form-group">
+                        <label for="senderEmail">
+                            <i class="fas fa-user"></i> Sender Email (Gmail)
+                        </label>
+                        <input type="email" id="senderEmail" placeholder="your-email@gmail.com" required>
+                        <small>The Gmail account to send reports from</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="appPassword">
+                            <i class="fas fa-key"></i> App Password
+                        </label>
+                        <input type="password" id="appPassword" placeholder="xxxx xxxx xxxx xxxx">
+                        <small>
+                            <a href="https://support.google.com/accounts/answer/185833" target="_blank">
+                                How to generate Gmail App Password
+                            </a>
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacherEmail">
+                            <i class="fas fa-chalkboard-teacher"></i> Teacher Email
+                        </label>
+                        <input type="email" id="teacherEmail" placeholder="teacher@example.com" required>
+                        <small>Email address to receive daily reports</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sendTime">
+                            <i class="fas fa-clock"></i> Daily Report Time
+                        </label>
+                        <input type="time" id="sendTime" value="17:00" required>
+                        <small>Time to send daily attendance report (24-hour format)</small>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="emailEnabled">
+                            <span>Enable Automated Daily Emails</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="sendTestEmail()">
+                            <i class="fas fa-paper-plane"></i> Send Test Email
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Save Configuration
+                        </button>
+                    </div>
+                </form>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e2e8f0;">
+
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <button class="btn-action" onclick="sendDailyReportNow()">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <div>
+                            <strong>Send Today's Report</strong>
+                            <small>Send attendance report to configured email</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Agent Widget -->
+        <div class="chat-widget">
+            <!-- Floating Button -->
+            <button class="chat-btn" onclick="toggleChat()" title="Ask AI Assistant">
+                <i class="fa-solid fa-robot"></i>
+            </button>
+
+            <!-- Chat Window -->
+            <div class="chat-window" id="chatWindow">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <i class="fa-solid fa-robot" style="margin-right: 8px;"></i> Attendance AI
+                    </div>
+                    <button class="chat-close" onclick="toggleChat()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message agent">
+                        Hi! I'm DOPA, your AI assistant. Ask me "Who is present?" or "How many people today?".
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type your question..."
+                        autocomplete="off">
+                    <button class="chat-send" onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // WebSocket Connection
+        let ws = null;
+        let reconnectInterval = null;
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                document.getElementById('connectionStatus').textContent = 'System Online';
+                document.querySelector('.status-dot').style.background = 'var(--success)';
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'initial_data' || data.type === 'attendance_update') {
+                    updateDashboard(data.attendance, data.statistics);
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                document.querySelector('.status-dot').style.background = 'var(--danger)';
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(connectWebSocket, 3000);
+                }
+            };
+        }
+
+        // Global variable to store current absent students
+        window.currentAbsentStudents = [];
+
+        function updateDashboard(attendance, statistics) {
+            const safeStats = statistics || {
+                total_people_today: 0,
+                total_absent_today: 0,
+                total_records_today: 0,
+                total_days: 0,
+                people_present_today: [],
+                people_absent_today: [],
+                last_updated: new Date().toISOString()
+            };
+
+            // Store absent students globally
+            window.currentAbsentStudents = safeStats.people_absent_today || [];
+
+            animateValue('totalPeopleToday', document.getElementById('totalPeopleToday').innerText, safeStats.total_people_today, 500);
+            animateValue('totalAbsentToday', document.getElementById('totalAbsentToday').innerText, safeStats.total_absent_today, 500);
+            animateValue('totalRecordsToday', document.getElementById('totalRecordsToday').innerText, safeStats.total_records_today, 500);
+            animateValue('totalDays', document.getElementById('totalDays').innerText, safeStats.total_days, 500);
+
+            try {
+                const lastUpdate = new Date(safeStats.last_updated);
+                if (!isNaN(lastUpdate.getTime())) {
+                    document.getElementById('lastUpdate').innerText = lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    document.getElementById('lastUpdate').innerText = '--:--';
+                }
+            } catch (e) {
+                document.getElementById('lastUpdate').innerText = '--:--';
+            }
+
+            renderTable(attendance || []);
+            renderActivityList(safeStats.people_present_today, attendance || []);
+            renderAbsentList(safeStats.people_absent_today);
+        }
+
+        function renderTable(attendance) {
+            const container = document.getElementById('attendanceContent');
+
+            if (attendance.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-regular fa-clipboard fa-2x" style="margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No attendance records for today</p>
+                    </div>`;
+                return;
+            }
+
+            if (currentView === 'grouped') {
+                renderGroupedView(attendance);
+            } else {
+                renderListView(attendance);
+            }
+        }
+
+        // Grouped view: Group by date with collapsible sections
+        function renderGroupedView(attendance) {
+            const container = document.getElementById('attendanceContent');
+
+            // Group records by date
+            const grouped = {};
+            attendance.forEach(record => {
+                const date = record.Date;
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                grouped[date].push(record);
+            });
+
+            // Sort dates descending (newest first)
+            const dates = Object.keys(grouped).sort().reverse();
+
+            let html = `<div class="grouped-attendance">`;
+
+            dates.forEach((date, index) => {
+                const records = grouped[date];
+                const presentCount = records.length;
+                const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+                const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                const isToday = date === new Date().toISOString().split('T')[0];
+                const isExpanded = index === 0; // First date expanded by default
+
+                html += `
+                    <div class="date-group ${isToday ? 'today' : ''}">
+                        <div class="date-header" onclick="toggleDateGroup(this)">
+                            <div class="date-info">
+                                <div class="date-day">${dayName}</div>
+                                <div class="date-full">${formattedDate}</div>
+                            </div>
+                            <div class="date-stats">
+                                <span class="student-count">${presentCount} student${presentCount !== 1 ? 's' : ''}</span>
+                                ${isToday ? '<span class="today-badge">Today</span>' : ''}
+                                <i class="fa-solid fa-chevron-down toggle-icon ${isExpanded ? 'expanded' : ''}"></i>
+                            </div>
+                        </div>
+                        <div class="date-content ${isExpanded ? 'expanded' : ''}">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Time In</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+
+                records.forEach(record => {
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="avatar">${record.Name.charAt(0)}</div>
+                                    <span style="font-weight: 500;">${record.Name}</span>
+                                </div>
+                            </td>
+                            <td style="font-family: monospace;">${record.Time}</td>
+                            <td><span class="status-pill status-present">Present</span></td>
+                        </tr>
+                    `;
+                });
+
+                // Add absent students (only for today)
+                if (isToday && window.currentAbsentStudents && window.currentAbsentStudents.length > 0) {
+                    window.currentAbsentStudents.forEach(name => {
+                        html += `
+                            <tr class="absent-row">
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="avatar avatar-absent">${name.charAt(0)}</div>
+                                        <span style="font-weight: 500; color: var(--danger);">${name}</span>
+                                    </div>
+                                </td>
+                                <td style="font-family: monospace; color: var(--text-muted);">--:--</td>
+                                <td><span class="status-pill status-absent">Absent</span></td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // List view: Traditional table format
+        function renderListView(attendance) {
+            const container = document.getElementById('attendanceContent');
+
+            // Sort by time descending
+            const sorted = [...attendance].reverse();
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Time In</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            html += sorted.map(record => `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">${record.Name.charAt(0)}</div>
+                            <span style="font-weight: 500;">${record.Name}</span>
+                        </div>
+                    </td>
+                    <td>${record.Date}</td>
+                    <td style="font-family: monospace;">${record.Time}</td>
+                    <td><span class="status-pill">Present</span></td>
+                </tr>
+            `).join('');
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        // Toggle date group expansion
+        function toggleDateGroup(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+
+            content.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+
+        function renderActivityList(people, attendance) {
+            const container = document.getElementById('peopleContent');
+
+            if (people.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Waiting for arrivals...</p>
+                    </div>`;
+                return;
+            }
+
+            // Get latest time for each person
+            const peopleData = people.map(name => {
+                const record = attendance.filter(r => r.Name === name).pop();
+                return { name, time: record ? record.Time : '' };
+            }).sort((a, b) => b.time.localeCompare(a.time));
+
+            container.innerHTML = peopleData.map(person => `
+                <div class="activity-item">
+                    <div class="avatar">${person.name.charAt(0)}</div>
+                    <div class="activity-content">
+                        <div class="activity-name">${person.name}</div>
+                        <div class="activity-time">Arrived at ${person.time}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: #cbd5e1;"></i>
+                </div>
+            `).join('');
+        }
+
+        function renderAbsentList(absentPeople) {
+            const container = document.getElementById('absentContent');
+
+            if (!absentPeople || absentPeople.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-check-circle" style="color: var(--success); font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                        <p style="color: var(--success);">Everyone is present!</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = absentPeople.map(name => `
+                <div class="activity-item" style="border-left: 3px solid var(--danger);">
+                    <div class="avatar" style="background: linear-gradient(135deg, #fca5a5, #ef4444);">${name.charAt(0)}</div>
+                    <div class="activity-content">
+                        <div class="activity-name">${name}</div>
+                        <div class="activity-time" style="color: var(--danger);">Not Arrived</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function animateValue(id, start, end, duration) {
+            // Ensure start and end are valid numbers
+            start = Number(start) || 0;
+            end = Number(end) || 0;
+
+            if (start === end) {
+                document.getElementById(id).innerHTML = end;
+                return;
+            }
+
+            const obj = document.getElementById(id);
+            if (!obj) return;
+
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentValue = Math.floor(progress * (end - start) + start);
+                obj.innerHTML = isNaN(currentValue) ? 0 : currentValue;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        async function refreshData() {
+            const date = document.getElementById('dateFilter').value;
+            // If date is selected (not today), fetch specific date
+            if (date && date !== new Date().toISOString().split('T')[0]) {
+                filterByDate(date);
+                return;
+            }
+
+            try {
+                const [attRes, statsRes] = await Promise.all([
+                    fetch('/api/attendance/today'),
+                    fetch('/api/statistics')
+                ]);
+
+                if (!attRes.ok || !statsRes.ok) {
+                    console.error('API request failed');
+                    return;
+                }
+
+                const attData = await attRes.json();
+                const statsData = await statsRes.json();
+
+                // Ensure we have valid data
+                const attendance = attData?.success ? (attData.data || []) : [];
+                const statistics = statsData?.success ? (statsData.data || {}) : {};
+
+                updateDashboard(attendance, statistics);
+            } catch (err) {
+                console.error('Failed to refresh data:', err);
+                // Update with empty data to prevent NaN
+                updateDashboard([], {
+                    total_people_today: 0,
+                    total_records_today: 0,
+                    total_days: 0,
+                    people_present_today: [],
+                    people_absent_today: [],
+                    last_updated: new Date().toISOString()
+                });
+            }
+        }
+
+        async function filterByDate(date) {
+            if (!date) {
+                refreshData(); // If cleared, show today
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/attendance/by-date/${date}`);
+                const result = await response.json();
+
+                // Only update table, not live stats (keep those for Today)
+                renderTable(result.data);
+
+                // Update title temporarily to show we are viewing history
+                const title = document.querySelector('.card-title');
+                title.innerHTML = `Overview: <span style="color: var(--primary);">${date}</span>`;
+
+            } catch (err) {
+                console.error('Failed to fetch history:', err);
+            }
+        }
+
+        function exportReport() {
+            const date = document.getElementById('dateFilter').value || new Date().toISOString().split('T')[0];
+            window.location.href = `/api/export/csv/${date}`;
+        }
+
+        // ============================================================================
+        // Live Clock
+        // ============================================================================
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+
+        // ============================================================================
+        // View Management (Grouped vs List)
+        // ============================================================================
+        let currentView = 'grouped'; // 'grouped' or 'list'
+
+        function switchView(view) {
+            currentView = view;
+
+            // Update button states
+            document.getElementById('btnGrouped').classList.toggle('active', view === 'grouped');
+            document.getElementById('btnList').classList.toggle('active', view === 'list');
+
+            // Re-render with current data
+            const date = document.getElementById('dateFilter').value;
+            if (date && date !== new Date().toISOString().split('T')[0]) {
+                filterByDate(date);
+            } else {
+                refreshData();
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set date picker to today
+            document.getElementById('dateFilter').valueAsDate = new Date();
+
+            // Start live clock
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // Handle Enter key for Chat
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            connectWebSocket();
+            refreshData();
+        });
+
+        // Chat Agent Logic
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('open');
+            if (chatWindow.classList.contains('open')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add User Message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Loading state
+            const loadingId = addMessage('...', 'agent', true);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                const data = await response.json();
+
+                // Remove loading, add agent response
+                removeMessage(loadingId);
+                addMessage(data.response, 'agent');
+
+            } catch (error) {
+                removeMessage(loadingId);
+                addMessage("Sorry, I'm having trouble connecting to the server.", 'agent');
+            }
+        }
+
+        function addMessage(text, sender, isLoading = false) {
+            const list = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            msgDiv.textContent = text;
+            if (isLoading) msgDiv.id = `msg-${Date.now()}`;
+
+            list.appendChild(msgDiv);
+            list.scrollTop = list.scrollHeight;
+            return msgDiv.id;
+        }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // ============================================================================
+        // Email Configuration Functions
+        // ============================================================================
+
+        async function openEmailSettings() {
+            document.getElementById('emailModalOverlay').classList.add('active');
+            document.getElementById('emailModal').classList.add('active');
+            await loadEmailConfig();
+        }
+
+        function closeEmailSettings() {
+            document.getElementById('emailModalOverlay').classList.remove('active');
+            document.getElementById('emailModal').classList.remove('active');
+        }
+
+        async function loadEmailConfig() {
+            try {
+                const response = await fetch('/api/email/config');
+                const result = await response.json();
+
+                if (result.success) {
+                    const config = result.data;
+                    document.getElementById('senderEmail').value = config.sender_email || '';
+                    document.getElementById('teacherEmail').value = config.teacher_email || '';
+                    document.getElementById('sendTime').value = config.send_time || '17:00';
+                    document.getElementById('emailEnabled').checked = config.enabled || false;
+
+                    // Update status
+                    const statusDiv = document.getElementById('configStatus');
+                    if (config.is_configured) {
+                        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> <span style="color: var(--success);">Email is configured and ready</span>';
+                        statusDiv.style.background = '#d1fae5';
+                    } else {
+                        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Email not configured yet. Please fill in the details below.</span>';
+                        statusDiv.style.background = '#fef3c7';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load email config:', error);
+                showNotification('Failed to load email configuration', 'error');
+            }
+        }
+
+        async function saveEmailConfig(event) {
+            event.preventDefault();
+
+            const config = {
+                sender_email: document.getElementById('senderEmail').value,
+                app_password: document.getElementById('appPassword').value || undefined,
+                recipient_email: document.getElementById('teacherEmail').value,
+                send_time: document.getElementById('sendTime').value,
+                enabled: document.getElementById('emailEnabled').checked
+            };
+
+            try {
+                const response = await fetch('/api/email/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Email configuration saved successfully!', 'success');
+                    await loadEmailConfig(); // Reload to update status
+                } else {
+                    showNotification('Failed to save configuration', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to save email config:', error);
+                showNotification('Failed to save configuration', 'error');
+            }
+        }
+
+        async function sendTestEmail() {
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/email/test', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Test email sent successfully! Check your inbox.', 'success');
+                } else {
+                    showNotification(`Failed to send test email: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to send test email:', error);
+                showNotification('Failed to send test email', 'error');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function sendDailyReportNow() {
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <div><strong>Sending...</strong></div>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/email/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Daily report sent successfully!', 'success');
+                } else {
+                    showNotification(`Failed to send report: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to send daily report:', error);
+                showNotification('Failed to send daily report', 'error');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            // Add to body
+            document.body.appendChild(notification);
+
+            // Trigger animation
+            setTimeout(() => notification.classList.add('show'), 10);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html>
