@@ -92,17 +92,17 @@ pip install -r web_requirements.txt
 
 **Option A: Auto-Start (Recommended)**
 ```bash
-start_system.bat  # Windows
+scripts\start_system.bat  # Windows
 # Opens dashboard + starts camera recognition
 ```
 
 **Option B: Manual Start**
 ```bash
 # Terminal 1: Start web server
-python app.py
+python src/app.py
 
 # Terminal 2: Start face recognition
-python webcam_recognition.py
+python src/webcam_recognition.py
 
 # Browser: Navigate to http://localhost:8000
 ```
@@ -162,37 +162,55 @@ Use the Student Management interface (Admin role required)
 ```
 Face-Attendance-System/
 │
-├── 📄 app.py                      # Flask web server & API
-├── 📄 webcam_recognition.py       # Real-time face recognition
-├── 📄 database.py                 # Database operations
-├── 📄 email_scheduler.py          # Automated email reports
-├── 📄 auth.py                     # User authentication
-├── 📄 student_management.py       # Student CRUD operations
-├── 📄 logger.py                   # Logging system
+├── 📄 README.md                   # Project documentation
+├── 📄 LICENSE                     # MIT License
+├── 📄 requirements.txt            # Python dependencies
+├── 📄 web_requirements.txt        # Web-specific dependencies
+├── 📄 .gitignore                  # Git ignore rules
 │
-├── 🤖 face_models/                # AI models & embeddings
-│   ├── best_model.pth            # Trained ArcFace model
+├── 📖 docs/                       # Documentation
+│   ├── PROJECT_STRUCTURE.md      # Detailed architecture
+│   ├── SRS_DOCUMENT.md          # Requirements specification
+│   └── PROTEUS_COMPLETE_GUIDE.md # Hardware simulation guide
+│
+├── 💻 src/                        # Source Code
+│   ├── app.py                    # Flask web server & API
+│   ├── webcam_recognition.py     # Real-time face recognition
+│   ├── database.py               # Database operations
+│   ├── email_scheduler.py        # Automated email reports
+│   ├── auth.py                   # User authentication
+│   ├── student_management.py     # Student CRUD operations
+│   ├── logger.py                 # Logging system
+│   ├── batch_processor.py        # Batch image processing
+│   ├── infrence.py               # Inference engine
+│   ├── embedded_door_system.py   # Hardware integration
+│   └── utils/                    # Utility modules
+│
+├── 🤖 models/                     # AI Models & Embeddings
+│   ├── best_model.pth            # Trained ArcFace model (PyTorch)
 │   ├── class_mapping.json        # Student ID mappings
-│   └── embeddings_db.npz         # Face embeddings
+│   └── embeddings_db.npz         # Face embeddings database
 │
-├── 🌐 static/                     # Web dashboard
-│   ├── index.html                # Main UI
-│   ├── styles.css                # Styling
-│   └── chat.css                  # Chat interface
+├── 🌐 static/                     # Web Frontend
+│   ├── index.html                # Main dashboard UI
+│   ├── styles.css                # Primary stylesheet
+│   └── chat.css                  # Chat interface styling
 │
-├── 📊 attendance.db               # SQLite database
-├── 📋 requirements.txt            # Python dependencies
+├── 🗄️ data/                       # Data Files (gitignored)
+│   ├── attendance.db             # SQLite database
+│   └── attendance.csv            # CSV exports
 │
-├── 🔨 Scripts/
+├── 🔨 scripts/                    # Automation Scripts
 │   ├── start_system.bat          # Auto-start script
 │   ├── backup_database.bat       # Manual backup
-│   └── setup_auto_backup.bat     # Schedule backups
+│   ├── setup_auto_backup.bat     # Schedule backups
+│   ├── fresh_start.bat           # Clean initialization
+│   └── cleanup_project.bat       # Project cleanup
 │
-└── 📖 Documentation/
-    ├── README.md                 # This file
-    ├── SRS_DOCUMENT.md          # Requirements spec
-    ├── PROTEUS_COMPLETE_GUIDE.md # Hardware guide
-    └── PROJECT_STRUCTURE.md     # Detailed architecture
+├── ⚙️ config/                     # Configuration
+│   └── email_config.json.example # Email config template
+│
+└── 📦 archive/                    # Legacy files & documentation
 ```
 
 ---
@@ -225,12 +243,12 @@ Face-Attendance-System/
 
 **Manual Backup:**
 ```bash
-backup_database.bat
+scripts\backup_database.bat
 ```
 
 **Automated Daily Backups:**
 ```bash
-setup_auto_backup.bat
+scripts\setup_auto_backup.bat
 # Schedules backup at 11:59 PM daily
 ```
 
@@ -242,7 +260,7 @@ setup_auto_backup.bat
 
 **Test Camera:**
 ```bash
-python webcam_recognition.py
+python src/webcam_recognition.py
 # Should open camera with face detection
 ```
 

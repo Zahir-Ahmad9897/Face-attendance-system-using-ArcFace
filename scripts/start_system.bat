@@ -8,7 +8,9 @@ echo ========================================================
 echo.
 
 :: 1. Define paths clearly
-set VENV_PATH=%~dp0venv_name
+set SCRIPT_DIR=%~dp0
+set PROJECT_ROOT=%SCRIPT_DIR%..
+set VENV_PATH=%PROJECT_ROOT%\venv_name
 set PYTHON_EXE=%VENV_PATH%\Scripts\python.exe
 
 :: Check if python exists
@@ -24,7 +26,7 @@ echo [1/3] Using Python from: %PYTHON_EXE%
 echo.
 echo [2/3] Starting Web Dashboard...
 :: Start app.py in a new window using the specific python executable
-start "Attendance Dashboard" cmd /k "%PYTHON_EXE% app.py"
+start "Attendance Dashboard" cmd /k "cd /d %PROJECT_ROOT% && %PYTHON_EXE% src\app.py"
 
 :: Wait a moment for server to start
 timeout /t 5 >nul
@@ -46,7 +48,8 @@ echo    -----------------------------------------------------
 echo.
 
 :: Run the webcam script using the specific python executable
-"%PYTHON_EXE%" webcam_recognition.py
+cd /d "%PROJECT_ROOT%"
+"%PYTHON_EXE%" src\webcam_recognition.py
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

@@ -4,152 +4,50 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
-.installed.cfg
+dist/
+build/
 *.egg
-MANIFEST
 
 # Virtual Environment
 venv/
 venv_name/
-ENV/
 env/
-.venv
+ENV/
 
-# Database Files
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
-attendance.db
-*.backup
-
-# Sensitive Configuration Files
-email_config.json
-config.json
-secrets.json
-.env
-.env.local
-
-# Email Attachments & Reports
-*.xlsx
-*.csv
-attendance_report_*.xlsx
-attendance_report_*.csv
-
-# Backup Files
-attendance_backup_*.json
-*.bak
-backup/
-
-# IDE / Editor
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
-*.sublime-project
-*.sublime-workspace
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# PyCharm
-.idea/
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# Operating System
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-desktop.ini
+*.log
+
+# Project Specific
+email_config.json
+*.db
+*.csv
+data/*.db
+data/*.csv
+models/*.pth
+models/*.npz
 
 # Logs
-*.log
 logs/
-*.log.*
+*.log
 
-# Model Files (if large)
-*.h5
-*.hdf5
-*.pt
-*.pth
-*.onnx
-*.tflite
-*.pb
-*.npz
-face_models/*.tflite
-face_models/*.h5
-face_models/*.npz
+# Backups
+backups/
+config_backup/
 
-# Temporary Files
-tmp/
+# Temporary files
 temp/
+tmp/
 *.tmp
 
-# Archive Files
-archive/
-*.zip
-*.tar.gz
-
-# Screenshots & Videos
-screenshots/
-recordings/
-*.mp4
-*.avi
-*.mov
-
-# Node modules (if any frontend build tools)
-node_modules/
-package-lock.json
-yarn.lock
-
-# Build outputs
-*.pyc
-*.pyo
-*.pyd
-
-# Test coverage
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Documentation builds
-docs/_build/
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
+# Archives (optional - uncomment if you don't want to track)
+# archive/
