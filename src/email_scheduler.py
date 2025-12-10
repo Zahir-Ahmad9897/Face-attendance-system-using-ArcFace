@@ -12,7 +12,11 @@ try:
 except ImportError:
     print("Warning: database module not found")
 
-CONFIG_FILE = "email_config.json"
+# Get the absolute path to the config file
+SCRIPT_DIR = Path(__file__).parent.absolute()
+PROJECT_ROOT = SCRIPT_DIR.parent
+CONFIG_FILE = PROJECT_ROOT / "config" / "email_config.json"
+FALLBACK_CONFIG = PROJECT_ROOT / "email_config.json"
 
 # ============================================================================
 # Configuration Management
@@ -20,9 +24,11 @@ CONFIG_FILE = "email_config.json"
 
 def load_config():
     """Load email configuration from JSON file"""
-    if os.path.exists(CONFIG_FILE):
+    config_path = CONFIG_FILE if CONFIG_FILE.exists() else FALLBACK_CONFIG
+    
+    if config_path.exists():
         try:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading config: {e}")
@@ -43,6 +49,8 @@ def get_default_config():
 
 def save_config(config: dict):
     """Save email configuration to JSON file"""
+    # Ensure directory exists
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
 
@@ -99,12 +107,12 @@ def send_email(subject: str, body: str, recipient_email: str = None):
         server.sendmail(sender_email, recipient_email, text)
         server.quit()
         
-        print(f"✅ Email sent successfully to {recipient_email}")
+        print(f"[OK] Email sent successfully to {recipient_email}")
         return True, "Email sent successfully"
     
     except Exception as e:
         error_msg = str(e)
-        print(f"❌ Error sending email: {error_msg}")
+        print(f"[ERROR] Error sending email: {error_msg}")
         return False, error_msg
 
 def generate_daily_report_html(date: str = None):
@@ -280,7 +288,7 @@ def send_daily_report(date: str = None, recipient_email: str = None):
 
 async def email_scheduler_task():
     """Background task to send daily emails at scheduled time"""
-    print("📧 Email scheduler started")
+    print("[EMAIL] Email scheduler started")
     
     last_sent_date = None
     
@@ -307,14 +315,14 @@ async def email_scheduler_task():
                 current_time.minute == send_time_obj.minute and
                 last_sent_date != current_date):
                 
-                print(f"⏰ Sending scheduled daily report for {current_date}")
+                print(f"[TIME] Sending scheduled daily report for {current_date}")
                 success, message = send_daily_report()
                 
                 if success:
                     last_sent_date = current_date
-                    print(f"✅ Daily report sent successfully")
+                    print(f"[OK] Daily report sent successfully")
                 else:
-                    print(f"❌ Failed to send daily report: {message}")
+                    print(f"[ERROR] Failed to send daily report: {message}")
             
             # Wait 60 seconds before next check
             await asyncio.sleep(60)
@@ -331,32 +339,35 @@ def send_test_email():
     """Send a test email to verify configuration"""
     subject = "Test Email - Face Recognition Attendance System"
     
-    body = """
+    config = load_config()
+    send_time = config.get('send_time', '17:00')
+    
+    body = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <style>
-            body {
+            body {{
                 font-family: Arial, sans-serif;
                 line-height: 1.6;
                 color: #333;
                 max-width: 600px;
                 margin: 0 auto;
                 padding: 20px;
-            }
-            .header {
+            }}
+            .header {{
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 padding: 30px;
                 border-radius: 10px;
                 text-align: center;
-            }
-            .content {
+            }}
+            .content {{
                 background: #f9f9f9;
                 padding: 30px;
                 margin-top: 20px;
                 border-radius: 10px;
-            }
+            }}
         </style>
     </head>
     <body>
@@ -366,12 +377,12 @@ def send_test_email():
         <div class="content">
             <h2>Configuration Successful!</h2>
             <p>Your email configuration is working correctly.</p>
-            <p>Daily attendance reports will be sent at the scheduled time.</p>
-            <p><strong>Time:</strong> {}</p>
+            <p>Attendance reports will now be sent instantly when you quit the recognition system!</p>
+            <p><strong>Configured Time (for reference):</strong> {send_time}</p>
         </div>
     </body>
     </html>
-    """.format(load_config().get('send_time', '17:00'))
+    """
     
     return send_email(subject, body)
 
@@ -380,6 +391,6 @@ if __name__ == "__main__":
     print("Testing email configuration...")
     success, message = send_test_email()
     if success:
-        print(f"✅ {message}")
+        print(f"[OK] {message}")
     else:
-        print(f"❌ {message}")
+        print(f"[ERROR] {message}")

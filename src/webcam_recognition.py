@@ -8,9 +8,10 @@ from PIL import Image
 import cv2
 from mtcnn import MTCNN
 import os
-from datetime import datetime
+from datetime import datetime, time
 import pandas as pd
 import json
+import threading
 
 # Import database module
 from database import (
@@ -20,6 +21,14 @@ from database import (
     is_student_present_today,
     get_statistics as get_db_statistics
 )
+
+# Import email functionality
+try:
+    from email_scheduler import send_daily_report, is_configured, load_config
+    EMAIL_AVAILABLE = True
+except ImportError:
+    print("Warning: email_scheduler module not found. Email functionality disabled.")
+    EMAIL_AVAILABLE = False
 
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -68,11 +77,16 @@ class ArcFaceModel(nn.Module):
 # Webcam Face Recognition System
 # ============================================================================
 class WebcamFaceRecognition:
-    def __init__(self, model_path='./face_models', threshold=0.65):
+    def __init__(self, model_path='./models', threshold=0.65):
         self.device = device
         self.threshold = threshold
         # No longer need in-memory log, using database
         self.marked_today = set()
+        
+        # Email scheduler thread control
+        self.scheduler_running = False
+        self.scheduler_thread = None
+        self.last_sent_date = None
         
         # Load already marked students from database
         today_records = get_today_attendance()
@@ -109,7 +123,7 @@ class WebcamFaceRecognition:
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ])
         
-        print(f"✅ System loaded!")
+        print(f"[OK] System loaded!")
         print(f"   Device: {device}")
         print(f"   Registered people: {self.person_names}")
         print(f"   Threshold: {threshold}")
@@ -185,6 +199,72 @@ class WebcamFaceRecognition:
             print("\n⚠️ No attendance records to export")
             return False
     
+    def email_scheduler_thread_func(self):
+        """Background thread to send emails at scheduled time"""
+        import time as time_module
+        
+        print("\n📧 Email scheduler started in background")
+        if EMAIL_AVAILABLE and is_configured():
+            config = load_config()
+            send_time_str = config.get('send_time', '17:00')
+            print(f"   Scheduled send time: {send_time_str}")
+        else:
+            print("   ⚠️ Email not configured")
+            return
+        
+        while self.scheduler_running:
+            try:
+                if not is_configured():
+                    time_module.sleep(60)
+                    continue
+                
+                config = load_config()
+                send_time_str = config.get('send_time', '17:00')
+                
+                # Parse send time
+                hour, minute = map(int, send_time_str.split(':'))
+                send_time_obj = time(hour, minute)
+                
+                now = datetime.now()
+                current_time = now.time()
+                current_date = now.strftime('%Y-%m-%d')
+                
+                # Check if it's time to send AND we haven't sent today yet
+                if (current_time.hour == send_time_obj.hour and 
+                    current_time.minute == send_time_obj.minute and
+                    self.last_sent_date != current_date):
+                    
+                    print(f"\n⏰ Scheduled time reached! Sending email report...")
+                    success, message = send_daily_report(date=current_date)
+                    
+                    if success:
+                        self.last_sent_date = current_date
+                        print(f"✅ Email sent successfully to configured recipient")
+                    else:
+                        print(f"❌ Failed to send email: {message}")
+                
+                # Wait 60 seconds before next check
+                time_module.sleep(60)
+            
+            except Exception as e:
+                print(f"Error in email scheduler: {e}")
+                time_module.sleep(60)
+    
+    def start_email_scheduler(self):
+        """Start the email scheduler in background thread"""
+        if EMAIL_AVAILABLE and is_configured():
+            self.scheduler_running = True
+            self.scheduler_thread = threading.Thread(target=self.email_scheduler_thread_func, daemon=True)
+            self.scheduler_thread.start()
+        else:
+            print("\n⚠️ Email scheduler not started (email not configured)")
+    
+    def stop_email_scheduler(self):
+        """Stop the email scheduler thread"""
+        self.scheduler_running = False
+        if self.scheduler_thread:
+            self.scheduler_thread.join(timeout=2)
+    
     def run(self):
         """Run webcam face recognition"""
         cap = cv2.VideoCapture(0)
@@ -192,6 +272,9 @@ class WebcamFaceRecognition:
         if not cap.isOpened():
             print("❌ Error: Could not open webcam")
             return
+        
+        # Start email scheduler in background
+        self.start_email_scheduler()
         
         print("\n" + "="*70)
         print("🎥 WEBCAM FACE RECOGNITION STARTED")
@@ -278,6 +361,7 @@ class WebcamFaceRecognition:
                 print("\n🔄 Today's attendance reset")
         
         # Cleanup
+        self.stop_email_scheduler()  # Stop the email scheduler thread
         cap.release()
         cv2.destroyAllWindows()
         
@@ -293,6 +377,14 @@ class WebcamFaceRecognition:
         if self.marked_today:
             print(f"People present: {', '.join([p.title() for p in self.marked_today])}")
         print(f"\n💾 All data saved to database (attendance.db)")
+        
+        # Show email scheduler status
+        if EMAIL_AVAILABLE and is_configured():
+            config = load_config()
+            send_time = config.get('send_time', '17:00')
+            print(f"\n📧 Email scheduler was running")
+            print(f"   Scheduled time: {send_time}")
+            print(f"   Emails are sent automatically at the scheduled time")
         print("="*70)
 
 # ============================================================================
@@ -300,7 +392,7 @@ class WebcamFaceRecognition:
 # ============================================================================
 if __name__ == "__main__":
     system = WebcamFaceRecognition(
-        model_path='./face_models',
+        model_path='./models',
         threshold=0.65
     )
     system.run()

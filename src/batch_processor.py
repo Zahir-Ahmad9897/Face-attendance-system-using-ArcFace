@@ -57,7 +57,7 @@ class ArcFaceModel(nn.Module):
 # Batch Image Processor
 # ============================================================================
 class BatchImageProcessor:
-    def __init__(self, model_path='./face_models', threshold=0.65):
+    def __init__(self, model_path='./models', threshold=0.65):
         self.device = device
         self.threshold = threshold
         
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     import sys
     
     processor = BatchImageProcessor(
-        model_path='./face_models',
+        model_path='./models',
         threshold=0.65
     )
     

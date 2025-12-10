@@ -60,7 +60,7 @@ class ArcFaceModel(nn.Module):
 # Complete System
 # ============================================================================
 class FaceRecognitionSystem:
-    def __init__(self, model_path='./face_models', threshold=0.65):
+    def __init__(self, model_path='../models', threshold=0.65):
         self.device = device
         self.threshold = threshold
         
@@ -147,7 +147,7 @@ class FaceRecognitionSystem:
 if __name__ == "__main__":
     # Initialize system
     system = FaceRecognitionSystem(
-        model_path='./face_models',
+        model_path='../models',
         threshold=0.65
     )
     

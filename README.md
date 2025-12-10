@@ -1,4 +1,4 @@
-# 🎯 Face Recognition Attendance System
+#  Face Recognition Attendance System
 
 <div align="center">
 
@@ -16,7 +16,7 @@
 
 ---
 
-## 📸 Demo
+##  Demo
 
 <div align="center">
 
@@ -27,16 +27,16 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 
 ---
 
-## ✨ Features
+##  Features
 
-### 🎥 **Core Capabilities**
+###  **Core Capabilities**
 - **Real-time Face Recognition** - ArcFace model with 99%+ accuracy
 - **Multi-face Detection** - Process multiple faces simultaneously
 - **Automated Attendance** - Mark attendance instantly with timestamp
-- **Daily Email Reports** - HTML-formatted reports sent to teachers
+- **Instant Email Reports** - HTML-formatted reports sent immediately when session ends
 - **Web Dashboard** - Beautiful, responsive monitoring interface
 
-### 🔧 **Technical Features**
+###  **Technical Features**
 - **SQLite Database** - Persistent attendance storage
 - **RESTful API** - Easy integration with other systems
 - **Auto Backup** - Scheduled database backups
@@ -44,7 +44,7 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 - **Authentication** - Secure dashboard access
 - **AI Chat Assistant** - Natural language queries about attendance
 
-### 🚀 **Deployment Ready**
+###  **Deployment Ready**
 - Edge AI deployment (Raspberry Pi, Jetson Nano)
 - Offline operation (no cloud required)
 - Multi-platform support (Windows, Linux, macOS)
@@ -52,7 +52,7 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 | Category | Technologies |
 |----------|-------------|
@@ -64,7 +64,7 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 
 ---
 
-## 📋 Requirements
+##  Requirements
 
 - **Python**: 3.9 or higher
 - **Camera**: USB webcam or IP camera
@@ -74,7 +74,7 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ### 1️⃣ Clone Repository
 ```bash
@@ -109,9 +109,9 @@ python src/webcam_recognition.py
 
 ---
 
-## 💻 Usage
+## Usage
 
-### 🌐 Access Dashboard
+###  Access Dashboard
 Open your browser and navigate to:
 ```
 http://localhost:8000
@@ -121,20 +121,48 @@ http://localhost:8000
 - **Admin**: `admin` / `admin123`
 - **Teacher**: `teacher` / `teacher123`
 
-⚠️ **Change default passwords immediately!**
+ **Change default passwords immediately!**
 
-### 📧 Configure Email Reports
+###  Configure Email Reports
 
-1. Navigate to **Email Setup** in dashboard
-2. Enter your Gmail credentials:
-   - Sender email
-   - [App password](https://myaccount.google.com/apppasswords) (not regular password)
-   - Recipient email
-   - Scheduled send time
-3. Click **Test Email** to verify
-4. Enable automated daily reports
+ **NEW: Instant Email Reports!** Attendance reports are now sent **directly when you quit the recognition system** (press 'q'). No waiting for scheduled times!
 
-### 👥 Manage Students
+**Quick Setup (Method 1 - Interactive):**
+```bash
+python src/setup_email.py
+# Follow the prompts to configure email
+```
+
+**Manual Setup (Method 2):**
+
+1. Create `config/email_config.json` (copy from `email_config.json.example`)
+2. Get a [Gmail App Password](https://myaccount.google.com/apppasswords):
+   - Enable 2-Factor Authentication
+   - Generate App Password for "Mail"
+   - Copy the 16-character password
+3. Update your config file:
+   ```json
+   {
+     "sender_email": "your-email@gmail.com",
+     "app_password": "your-16-char-password",
+     "teacher_email": "recipient@example.com",
+     "enabled": true
+   }
+   ```
+4. Test configuration:
+   ```bash
+   python src/email_scheduler.py
+   ```
+
+**How It Works:**
+1. Run `python src/webcam_recognition.py`
+2. Mark attendance as usual
+3. Press 'q' to quit
+4. **Email is sent automatically** with today's attendance report!
+
+📖 **Full Setup Guide:** See [EMAIL_SETUP.md](EMAIL_SETUP.md) for detailed instructions
+
+###  Manage Students
 
 **Via API:**
 ```bash
@@ -157,7 +185,7 @@ Use the Student Management interface (Admin role required)
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 Face-Attendance-System/
@@ -215,7 +243,7 @@ Face-Attendance-System/
 
 ---
 
-## 📊 Dashboard Features
+##  Dashboard Features
 
 | Feature | Description |
 |---------|-------------|
@@ -229,7 +257,7 @@ Face-Attendance-System/
 
 ---
 
-## 🔐 Security
+##  Security
 
 - Password hashing with bcrypt
 - JWT-based authentication
@@ -239,7 +267,7 @@ Face-Attendance-System/
 
 ---
 
-## 💾 Backup & Recovery
+##  Backup & Recovery
 
 **Manual Backup:**
 ```bash
@@ -256,7 +284,7 @@ scripts\setup_auto_backup.bat
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 **Test Camera:**
 ```bash
@@ -278,7 +306,7 @@ curl http://localhost:8000/api/students/all
 
 ---
 
-## 📖 Documentation
+##  Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -288,7 +316,7 @@ curl http://localhost:8000/api/students/all
 
 ---
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 <details>
 <summary><b>Camera not detected</b></summary>
@@ -331,7 +359,7 @@ curl http://localhost:8000/api/students/all
 
 ---
 
-## 🚀 Deployment
+##  Deployment
 
 ### Edge AI Deployment (Raspberry Pi / Jetson Nano)
 
@@ -345,7 +373,7 @@ curl http://localhost:8000/api/students/all
 
 ---
 
-## 🎯 Roadmap
+##  Roadmap
 
 - [x] Real-time face recognition
 - [x] Web dashboard
@@ -361,7 +389,7 @@ curl http://localhost:8000/api/students/all
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -373,13 +401,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Zahir Ahmad**
 
@@ -388,7 +416,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🌟 Acknowledgments
+##  Acknowledgments
 
 - ArcFace paper: [ArcFace: Additive Angular Margin Loss](https://arxiv.org/abs/1801.07698)
 - MTCNN for face detection
@@ -397,7 +425,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📈 Stats
+## Stats
 
 - **Model Accuracy**: 99.2% on test dataset
 - **Processing Speed**: 30-60 FPS (real-time)
@@ -408,9 +436,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-### ⭐ Star this repository if you find it helpful!
+###  Star this repository if you find it helpful!
 
-**Made with ❤️ for automated attendance tracking**
+**Made with  for automated attendance tracking**
 
 [Report Bug](https://github.com/Zahir-Ahmad9897/Face-attendance-system-using-ArcFace/issues) · [Request Feature](https://github.com/Zahir-Ahmad9897/Face-attendance-system-using-ArcFace/issues)
 

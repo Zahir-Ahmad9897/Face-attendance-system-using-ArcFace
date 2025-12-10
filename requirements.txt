@@ -39,3 +39,6 @@ onnxruntime>=1.15.0
 
 # Additional utilities
 colorama>=0.4.6
+
+# Serial Communication (for Proteus integration)
+pyserial>=3.5

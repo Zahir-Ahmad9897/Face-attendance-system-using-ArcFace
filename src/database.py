@@ -4,8 +4,13 @@ import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
-DATABASE_FILE = "attendance.db"
-ATTENDANCE_JSON = "attendance.json"
+DATABASE_FILE = "../data/attendance.db"
+ATTENDANCE_JSON = "../data/attendance.json"
+
+# Ensure data directory exists
+DATA_DIR = os.path.dirname(DATABASE_FILE)
+if DATA_DIR and not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR, exist_ok=True)
 
 # Default student list - can be updated
 ALL_STUDENTS = ["Mehran", "Yousaf", "Zahir"]
@@ -118,17 +123,17 @@ def migrate_json_to_db():
         conn.commit()
         conn.close()
         
-        print(f"✅ Migrated {migrated_count} records from JSON to database")
+        print(f"[OK] Migrated {migrated_count} records from JSON to database")
         
         # Backup JSON file
         backup_name = f"attendance_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         os.rename(ATTENDANCE_JSON, backup_name)
-        print(f"📦 JSON file backed up as: {backup_name}")
+        print(f"[*] JSON file backed up as: {backup_name}")
         
         return migrated_count
     
     except Exception as e:
-        print(f"❌ Error during migration: {e}")
+        print(f"[ERROR] Error during migration: {e}")
         return 0
 
 # ============================================================================
@@ -372,15 +377,15 @@ def is_student_present_today(name: str) -> bool:
 
 # Auto-initialize database on first import
 if not os.path.exists(DATABASE_FILE):
-    print("🔧 Creating database for the first time...")
+    print("[*] Creating database for the first time...")
     init_database()
     
     # Auto-migrate JSON data if exists
     if os.path.exists(ATTENDANCE_JSON):
-        print("📋 Found existing JSON data, migrating to database...")
+        print("[*] Found existing JSON data, migrating to database...")
         migrate_json_to_db()
     
-    print("✅ Database ready!")
+    print("[OK] Database ready!")
 else:
     # Ensure tables exist
     init_database()
