@@ -1,4 +1,4 @@
-#  Face Recognition Attendance System
+# Face Recognition Attendance System
 
 <div align="center">
 
@@ -8,43 +8,45 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)
 
-**Production-ready AI-powered attendance system with real-time face recognition, automated reporting, and web dashboard.**
+**Production-ready AI-powered attendance system with real-time face recognition, automated reporting, web dashboard, and Proteus hardware simulation.**
 
-[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Usage](#-usage) • [Documentation](#-documentation)
+[Features](#features) • [Demo](#demo) • [Installation](#installation) • [Usage](#usage) • [Proteus Integration](#proteus-integration) • [Documentation](#documentation)
 
 </div>
 
 ---
 
-##  Demo
+## Demo
 
 <div align="center">
 
 ### System in Action
-Real-time face detection → ArcFace recognition → Automated attendance marking → Daily email reports
+Real-time face detection → ArcFace recognition → Automated attendance marking → Serial communication to Proteus → Daily email reports
 
 </div>
 
 ---
 
-##  Features
+## Features
 
-###  **Core Capabilities**
+### **Core Capabilities**
 - **Real-time Face Recognition** - ArcFace model with 99%+ accuracy
-- **Multi-face Detection** - Process multiple faces simultaneously
+- **Multi-face Detection** - Process multiple faces simultaneously  
 - **Automated Attendance** - Mark attendance instantly with timestamp
-- **Instant Email Reports** - HTML-formatted reports sent immediately when session ends
+- **Proteus Hardware Simulation** - Send recognized faces to virtual Arduino/LCD display
+- **Instant Email Reports** - HTML-formatted reports sent when session ends
 - **Web Dashboard** - Beautiful, responsive monitoring interface
 
-###  **Technical Features**
+### **Technical Features**
 - **SQLite Database** - Persistent attendance storage
 - **RESTful API** - Easy integration with other systems
+- **Serial Communication** - Virtual COM port integration for hardware simulation
 - **Auto Backup** - Scheduled database backups
 - **Logging System** - Complete activity tracking
 - **Authentication** - Secure dashboard access
 - **AI Chat Assistant** - Natural language queries about attendance
 
-###  **Deployment Ready**
+### **Deployment Ready**
 - Edge AI deployment (Raspberry Pi, Jetson Nano)
 - Offline operation (no cloud required)
 - Multi-platform support (Windows, Linux, macOS)
@@ -52,7 +54,7 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 
 ---
 
-##  Technology Stack
+## Technology Stack
 
 | Category | Technologies |
 |----------|-------------|
@@ -61,34 +63,36 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 | **Frontend** | HTML5, CSS3, JavaScript |
 | **Email** | SMTP, Schedule |
 | **Authentication** | JWT, bcrypt |
+| **Hardware**  | Proteus, Arduino, VSPE (Virtual Serial Port) |
 
 ---
 
-##  Requirements
+## Requirements
 
 - **Python**: 3.9 or higher
 - **Camera**: USB webcam or IP camera
 - **RAM**: 4GB minimum (8GB recommended)
 - **Storage**: 2GB free space
 - **OS**: Windows, Linux, or macOS
+- **Optional**: Arduino IDE (for Proteus simulation), VSPE (for virtual COM ports)
 
 ---
 
-##  Installation
+## Installation
 
-### 1️⃣ Clone Repository
+### 1. Clone Repository
 ```bash
 git clone https://github.com/Zahir-Ahmad9897/Face-attendance-system-using-ArcFace.git
 cd Face-attendance-system-using-ArcFace
 ```
 
-### 2️⃣ Install Dependencies
+### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
 pip install -r web_requirements.txt
 ```
 
-### 3️⃣ Run the System
+### 3. Run the System
 
 **Option A: Auto-Start (Recommended)**
 ```bash
@@ -111,7 +115,7 @@ python src/webcam_recognition.py
 
 ## Usage
 
-###  Access Dashboard
+### Access Dashboard
 Open your browser and navigate to:
 ```
 http://localhost:8000
@@ -121,11 +125,11 @@ http://localhost:8000
 - **Admin**: `admin` / `admin123`
 - **Teacher**: `teacher` / `teacher123`
 
- **Change default passwords immediately!**
+**IMPORTANT:** Change default passwords immediately!
 
-###  Configure Email Reports
+### Configure Email Reports
 
- **NEW: Instant Email Reports!** Attendance reports are now sent **directly when you quit the recognition system** (press 'q'). No waiting for scheduled times!
+**NEW: Instant Email Reports!** Attendance reports are now sent **directly when you quit the recognition system** (press 'q'). No waiting for scheduled times!
 
 **Quick Setup (Method 1 - Interactive):**
 ```bash
@@ -160,9 +164,9 @@ python src/setup_email.py
 3. Press 'q' to quit
 4. **Email is sent automatically** with today's attendance report!
 
-📖 **Full Setup Guide:** See [EMAIL_SETUP.md](EMAIL_SETUP.md) for detailed instructions
+Full Setup Guide available in documentation.
 
-###  Manage Students
+### Manage Students
 
 **Via API:**
 ```bash
@@ -185,65 +189,164 @@ Use the Student Management interface (Admin role required)
 
 ---
 
-##  Project Structure
+## Proteus Integration
+
+### Hardware Simulation with Virtual Arduino
+
+This system supports **Proteus hardware simulation** to demonstrate real-world deployment scenarios (e.g., automatic door access control).
+
+### Features
+- **Virtual COM Port** communication between Python and Proteus
+- **LCD Display** shows recognized student names
+- **Door Servo** opens for authorized students
+- **LED Indicators** (Green = Access Granted, Red = Access Denied)
+- **Buzzer Alerts** for audio feedback
+- **Attendance Logging** in virtual EEPROM
+
+### Quick Setup
+
+#### Step 1: Install VSPE (Virtual Serial Port Emulator)
+1. Download VSPE from: https://www.eterlogic.com/Products.VSPE.html
+2. Install and run VSPE
+3. Create port pair: **COM2 ↔ COM4**
+4. Start emulation (click Play button)
+
+#### Step 2: Setup Arduino Code
+1. Install Arduino IDE: https://www.arduino.cc/en/software
+2. Open Arduino IDE
+3. Open file: `proteus/Student_face_Detection_System_Arduino_Proteus_updated.ino`
+4. Select: Tools → Board → Arduino Uno
+5. Click: Sketch → Export compiled Binary
+6. HEX file will be created in the same folder
+
+#### Step 3: Configure Proteus
+1. Open Proteus project: `proteus/Driver_Sleep_Detection_System_Arduino_Proteus.pdsprj`
+2. Double-click the Arduino component
+3. Set Program File to the compiled HEX file
+4. Find the Serial Communication Module (red box, top right)
+5. Double-click it and set Physical Port to **COM4**
+6. Click Play button in Proteus
+
+#### Step 4: Run Face Recognition
+```bash
+python src/webcam_recognition.py
+```
+
+**Expected Behavior:**
+- Python sends recognized names to COM2 every 10 seconds
+- VSPE forwards COM2 → COM4
+- Proteus Arduino receives on COM4
+- LCD displays student name
+- Green LED lights up
+- Door servo opens
+- Buzzer beeps
+- Attendance marked in EEPROM
+
+### Serial Communication Details
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| Python Script | COM2 | Sends recognized names |
+| VSPE | COM2 ↔ COM4 | Virtual port pair |
+| Proteus Arduino | COM4 | Receives names from Python |
+
+**Data Format:** Lowercase name + newline (`zahir\n`, `mehran\n`, `unknown\n`)
+**Frequency:** Every 10 seconds
+**Baud Rate:** 9600
+
+### Proteus Configuration Files
+
+```
+proteus/
+├── Driver_Sleep_Detection_System_Arduino_Proteus.pdsprj  # Main Proteus project
+├── Student_face_Detection_System_Arduino_Proteus_updated.ino  # Arduino source code
+├── Student_face_Detection_System_Arduino_Proteus_updated.ino.hex  # Compiled firmware
+├── VSPE_SETUP.md  # Virtual port setup guide
+└── v ports.vspe  # VSPE configuration file
+```
+
+### Troubleshooting Proteus Integration
+
+**Problem: COM2 Access Denied**
+- Solution: Run VSPE as Administrator
+
+**Problem: No data in Proteus**
+1. Check VSPE is running with COM2-COM4 pair active
+2. Verify Proteus Serial Module is set to COM4
+3. Ensure Python console shows `[PROTEUS] Sent: <name>`
+
+**Problem: LCD shows "Ready!" but no names**
+- Solution: Double-click Serial_Communication_Module in Proteus, set Physical Port to COM4
+
+Full Proteus integration guide: `docs/PROTEUS_COMPLETE_GUIDE.md`
+
+---
+
+## Project Structure
 
 ```
 Face-Attendance-System/
 │
-├── 📄 README.md                   # Project documentation
-├── 📄 LICENSE                     # MIT License
-├── 📄 requirements.txt            # Python dependencies
-├── 📄 web_requirements.txt        # Web-specific dependencies
-├── 📄 .gitignore                  # Git ignore rules
+├── README.md                   # Project documentation
+├── LICENSE                     # MIT License
+├── requirements.txt            # Python dependencies
+├── web_requirements.txt        # Web-specific dependencies
+├── .gitignore                  # Git ignore rules
 │
-├── 📖 docs/                       # Documentation
-│   ├── PROJECT_STRUCTURE.md      # Detailed architecture
-│   ├── SRS_DOCUMENT.md          # Requirements specification
+├── docs/                       # Documentation
+│   ├── PROJECT_STRUCTURE.md  # Detailed architecture
+│   ├── SRS_DOCUMENT.md        # Requirements specification
 │   └── PROTEUS_COMPLETE_GUIDE.md # Hardware simulation guide
 │
-├── 💻 src/                        # Source Code
-│   ├── app.py                    # Flask web server & API
-│   ├── webcam_recognition.py     # Real-time face recognition
-│   ├── database.py               # Database operations
-│   ├── email_scheduler.py        # Automated email reports
-│   ├── auth.py                   # User authentication
-│   ├── student_management.py     # Student CRUD operations
-│   ├── logger.py                 # Logging system
-│   ├── batch_processor.py        # Batch image processing
-│   ├── infrence.py               # Inference engine
-│   ├── embedded_door_system.py   # Hardware integration
-│   └── utils/                    # Utility modules
+├── src/                        # Source Code
+│   ├── app.py                # Flask web server & API
+│   ├── webcam_recognition.py # Real-time face recognition (with Proteus integration)
+│   ├── database.py           # Database operations
+│   ├── email_scheduler.py    # Automated email reports
+│   ├── auth.py               # User authentication
+│   ├── student_management.py # Student CRUD operations
+│   ├── logger.py             # Logging system
+│   ├── batch_processor.py    # Batch image processing
+│   ├── infrence.py           # Inference engine
+│   └── utils/                # Utility modules
 │
-├── 🤖 models/                     # AI Models & Embeddings
-│   ├── best_model.pth            # Trained ArcFace model (PyTorch)
-│   ├── class_mapping.json        # Student ID mappings
-│   └── embeddings_db.npz         # Face embeddings database
+├── models/                     # AI Models & Embeddings
+│   ├── best_model.pth        # Trained ArcFace model (PyTorch)
+│   ├── class_mapping.json    # Student ID mappings
+│   └── embeddings_db.npz     # Face embeddings database
 │
-├── 🌐 static/                     # Web Frontend
-│   ├── index.html                # Main dashboard UI
-│   ├── styles.css                # Primary stylesheet
-│   └── chat.css                  # Chat interface styling
+├── static/                     # Web Frontend
+│   ├── index.html            # Main dashboard UI
+│   ├── styles.css            # Primary stylesheet
+│   └── chat.css              # Chat interface styling
 │
-├── 🗄️ data/                       # Data Files (gitignored)
-│   ├── attendance.db             # SQLite database
-│   └── attendance.csv            # CSV exports
+├── data/                       # Data Files (gitignored)
+│   ├── attendance.db         # SQLite database
+│   └── attendance.csv        # CSV exports
 │
-├── 🔨 scripts/                    # Automation Scripts
-│   ├── start_system.bat          # Auto-start script
-│   ├── backup_database.bat       # Manual backup
-│   ├── setup_auto_backup.bat     # Schedule backups
-│   ├── fresh_start.bat           # Clean initialization
-│   └── cleanup_project.bat       # Project cleanup
+├── scripts/                    # Automation Scripts
+│   ├── start_system.bat      # Auto-start script
+│   ├── backup_database.bat   # Manual backup
+│   ├── setup_auto_backup.bat # Schedule backups
+│   ├── fresh_start.bat       # Clean initialization
+│   └── cleanup_project.bat   # Project cleanup
 │
-├── ⚙️ config/                     # Configuration
+├── config/                     # Configuration
 │   └── email_config.json.example # Email config template
 │
-└── 📦 archive/                    # Legacy files & documentation
+├── proteus/                    # Hardware Simulation Files
+│   ├── Driver_Sleep_Detection_System_Arduino_Proteus.pdsprj  # Proteus project
+│   ├── Student_face_Detection_System_Arduino_Proteus_updated.ino  # Arduino code
+│   ├── Student_face_Detection_System_Arduino_Proteus_updated.ino.hex  # Compiled firmware
+│   ├── VSPE_SETUP.md         # Virtual port setup guide
+│   └── v ports.vspe          # VSPE configuration
+│
+└── archive/                    # Legacy files & documentation
 ```
 
 ---
 
-##  Dashboard Features
+## Dashboard Features
 
 | Feature | Description |
 |---------|-------------|
@@ -257,7 +360,7 @@ Face-Attendance-System/
 
 ---
 
-##  Security
+## Security
 
 - Password hashing with bcrypt
 - JWT-based authentication
@@ -267,7 +370,7 @@ Face-Attendance-System/
 
 ---
 
-##  Backup & Recovery
+## Backup & Recovery
 
 **Manual Backup:**
 ```bash
@@ -284,7 +387,7 @@ scripts\setup_auto_backup.bat
 
 ---
 
-##  Testing
+## Testing
 
 **Test Camera:**
 ```bash
@@ -294,7 +397,7 @@ python src/webcam_recognition.py
 
 **Test Email:**
 ```bash
-python archive/test_email.py
+python src/email_scheduler.py
 # Sends a test email
 ```
 
@@ -304,19 +407,27 @@ curl http://localhost:8000/api/students/all
 # Should return list of students
 ```
 
+**Test Proteus Connection:**
+```
+1. Start VSPE with COM2-COM4 pair
+2. Open Proteus and press Play
+3. Run: python src/webcam_recognition.py
+4. Check LCD in Proteus shows student names
+```
+
 ---
 
-##  Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | Complete architecture overview |
-| [SRS_DOCUMENT.md](SRS_DOCUMENT.md) | Software requirements specification |
-| [PROTEUS_COMPLETE_GUIDE.md](PROTEUS_COMPLETE_GUIDE.md) | Hardware simulation guide |
+| [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Complete architecture overview |
+| [SRS_DOCUMENT.md](docs/SRS_DOCUMENT.md) | Software requirements specification |
+| [PROTEUS_COMPLETE_GUIDE.md](docs/PROTEUS_COMPLETE_GUIDE.md) | Hardware simulation guide |
 
 ---
 
-##  Troubleshooting
+## Troubleshooting
 
 <details>
 <summary><b>Camera not detected</b></summary>
@@ -324,7 +435,7 @@ curl http://localhost:8000/api/students/all
 - Check USB connection
 - Try different camera index: `cv2.VideoCapture(1)` or `(2)`
 - Verify camera permissions
-- Test with: `python webcam_recognition.py`
+- Test with: `python src/webcam_recognition.py`
 
 </details>
 
@@ -334,7 +445,7 @@ curl http://localhost:8000/api/students/all
 - Generate new [App Password](https://myaccount.google.com/apppasswords)
 - Enable 2-Factor Authentication on Gmail
 - Remove spaces from password
-- Test with: `python archive/test_email.py`
+- Test with: `python src/email_scheduler.py`
 
 </details>
 
@@ -342,7 +453,7 @@ curl http://localhost:8000/api/students/all
 <summary><b>Database locked error</b></summary>
 
 - Close all connections to database
-- Restart server: `python app.py`
+- Restart server: `python src/app.py`
 - Check `logs/` for detailed errors
 
 </details>
@@ -350,16 +461,27 @@ curl http://localhost:8000/api/students/all
 <details>
 <summary><b>Dashboard not loading</b></summary>
 
-- Verify server is running: `python app.py`
+- Verify server is running: `python src/app.py`
 - Try: `http://127.0.0.1:8000`
 - Clear browser cache
 - Check firewall settings
 
 </details>
 
+<details>
+<summary><b>Proteus not receiving data</b></summary>
+
+- Verify VSPE is running with COM2-COM4 pair
+- Check VSPE emulation is STARTED (not stopped)
+- Run VSPE as Administrator
+- In Proteus, double-click Serial_Communication_Module and verify COM4
+- Check Python console shows `[PROTEUS] Sent: <name>`
+
+</details>
+
 ---
 
-##  Deployment
+## Deployment
 
 ### Edge AI Deployment (Raspberry Pi / Jetson Nano)
 
@@ -369,17 +491,25 @@ curl http://localhost:8000/api/students/all
 4. Access dashboard remotely via device IP
 5. Works offline - no cloud required!
 
-**See:** [EDGE_AI_DEPLOYMENT.md](archive/docs/EDGE_AI_DEPLOYMENT.md)
+### Hardware Deployment with Arduino
+
+The Proteus simulation can be converted to real hardware:
+1. Flash the compiled HEX to real Arduino Uno
+2. Connect LCD (16x2), LEDs, Servo, Buzzer as per Proteus schematic
+3. Use USB-to-Serial adapter instead of virtual COM ports
+4. Update COM port in `webcam_recognition.py` to match hardware
 
 ---
 
-##  Roadmap
+## Roadmap
 
 - [x] Real-time face recognition
 - [x] Web dashboard
 - [x] Email automation
 - [x] Database backups
 - [x] API endpoints
+- [x] Proteus hardware simulation
+- [x] Serial communication integration
 - [ ] Mobile app
 - [ ] Multi-camera support
 - [ ] SMS notifications
@@ -389,7 +519,7 @@ curl http://localhost:8000/api/students/all
 
 ---
 
-##  Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -401,13 +531,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-##  License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-##  Author
+## Author
 
 **Zahir Ahmad**
 
@@ -416,12 +546,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-##  Acknowledgments
+## Acknowledgments
 
 - ArcFace paper: [ArcFace: Additive Angular Margin Loss](https://arxiv.org/abs/1801.07698)
 - MTCNN for face detection
 - Flask framework
 - PyTorch team
+- Proteus Design Suite by Labcenter Electronics
+- VSPE by Eterlogic
 
 ---
 
@@ -431,14 +563,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Processing Speed**: 30-60 FPS (real-time)
 - **Response Time**: <100ms per face
 - **Capacity**: Supports 1000+ students
+- **Serial Communication**: 9600 baud, 10-second intervals
 
 ---
 
 <div align="center">
 
-###  Star this repository if you find it helpful!
+### Star this repository if you find it helpful!
 
-**Made with  for automated attendance tracking**
+**Made with care for automated attendance tracking and hardware integration**
 
 [Report Bug](https://github.com/Zahir-Ahmad9897/Face-attendance-system-using-ArcFace/issues) · [Request Feature](https://github.com/Zahir-Ahmad9897/Face-attendance-system-using-ArcFace/issues)
 
