@@ -12,6 +12,13 @@ from datetime import datetime, time
 import pandas as pd
 import json
 import threading
+import sys
+import serial
+import time as time_module
+
+# Fix Windows console encoding for emoji support
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8') if hasattr(sys.stdout, 'reconfigure') else None
 
 # Import database module
 from database import (
@@ -77,7 +84,7 @@ class ArcFaceModel(nn.Module):
 # Webcam Face Recognition System
 # ============================================================================
 class WebcamFaceRecognition:
-    def __init__(self, model_path='./models', threshold=0.65):
+    def __init__(self, model_path='./models', threshold=0.65, com_port='COM3', baud_rate=9600):
         self.device = device
         self.threshold = threshold
         # No longer need in-memory log, using database
@@ -87,6 +94,22 @@ class WebcamFaceRecognition:
         self.scheduler_running = False
         self.scheduler_thread = None
         self.last_sent_date = None
+        
+        # Serial communication for Proteus
+        self.serial_port = None
+        self.com_port = com_port
+        self.last_sent_name = None
+        self.last_send_time = 0
+        self.send_cooldown = 10.0  # Send every 10 seconds
+        
+        # Initialize serial port
+        try:
+            self.serial_port = serial.Serial(com_port, baud_rate, timeout=1)
+            time_module.sleep(2)
+            print(f"[SERIAL] Connected to {com_port} at {baud_rate} baud")
+        except Exception as e:
+            print(f"[SERIAL] Warning: Could not open {com_port}: {e}")
+            print(f"[SERIAL] Running without Proteus integration")
         
         # Load already marked students from database
         today_records = get_today_attendance()
@@ -174,7 +197,7 @@ class WebcamFaceRecognition:
             )
             
             self.marked_today.add(person_name)
-            print(f"\n✅ Attendance marked for {person_name.title()} at {timestamp.strftime('%H:%M:%S')}")
+            print(f"\n Attendance marked for {person_name.title()} at {timestamp.strftime('%H:%M:%S')}")
             return True
         return False
     
@@ -188,28 +211,28 @@ class WebcamFaceRecognition:
                 # Save as JSON
                 with open(filename, 'w', encoding='utf-8') as f:
                     json.dump(all_records, f, indent=2, ensure_ascii=False)
-                print(f"\n💾 Attendance exported to {filename}")
+                print(f"\n Attendance exported to {filename}")
             else:
                 # Save as CSV
                 df = pd.DataFrame(all_records)
                 df.to_csv(filename, index=False)
-                print(f"\n💾 Attendance exported to {filename}")
+                print(f"\n Attendance exported to {filename}")
             return True
         else:
-            print("\n⚠️ No attendance records to export")
+            print("\n No attendance records to export")
             return False
     
     def email_scheduler_thread_func(self):
         """Background thread to send emails at scheduled time"""
         import time as time_module
         
-        print("\n📧 Email scheduler started in background")
+        print("\n[EMAIL] Email scheduler started in background")
         if EMAIL_AVAILABLE and is_configured():
             config = load_config()
             send_time_str = config.get('send_time', '17:00')
             print(f"   Scheduled send time: {send_time_str}")
         else:
-            print("   ⚠️ Email not configured")
+            print("   [WARNING] Email not configured")
             return
         
         while self.scheduler_running:
@@ -234,14 +257,14 @@ class WebcamFaceRecognition:
                     current_time.minute == send_time_obj.minute and
                     self.last_sent_date != current_date):
                     
-                    print(f"\n⏰ Scheduled time reached! Sending email report...")
+                    print(f"\n[TIME] Scheduled time reached! Sending email report...")
                     success, message = send_daily_report(date=current_date)
                     
                     if success:
                         self.last_sent_date = current_date
-                        print(f"✅ Email sent successfully to configured recipient")
+                        print(f"[OK] Email sent successfully to configured recipient")
                     else:
-                        print(f"❌ Failed to send email: {message}")
+                        print(f"[ERROR] Failed to send email: {message}")
                 
                 # Wait 60 seconds before next check
                 time_module.sleep(60)
@@ -257,7 +280,7 @@ class WebcamFaceRecognition:
             self.scheduler_thread = threading.Thread(target=self.email_scheduler_thread_func, daemon=True)
             self.scheduler_thread.start()
         else:
-            print("\n⚠️ Email scheduler not started (email not configured)")
+            print("\n[WARNING] Email scheduler not started (email not configured)")
     
     def stop_email_scheduler(self):
         """Stop the email scheduler thread"""
@@ -265,19 +288,41 @@ class WebcamFaceRecognition:
         if self.scheduler_thread:
             self.scheduler_thread.join(timeout=2)
     
+    def send_to_proteus(self, person_name):
+        """Send recognized name to Proteus via serial port every 10 seconds"""
+        if not self.serial_port or not self.serial_port.is_open:
+            return
+        
+        # Normalize name
+        name = person_name.lower().strip()
+        
+        # Check cooldown - Send every 10 seconds
+        current_time = time_module.time()
+        if current_time - self.last_send_time < self.send_cooldown:
+            return
+        
+        # Send name with newline (send even if same as last, every 10 seconds)
+        try:
+            self.serial_port.write(f"{name}\n".encode())
+            print(f"[PROTEUS] Sent: {name}")
+            self.last_sent_name = name
+            self.last_send_time = current_time
+        except Exception as e:
+            print(f"[SERIAL] Error sending data: {e}")
+    
     def run(self):
         """Run webcam face recognition"""
         cap = cv2.VideoCapture(0)
         
         if not cap.isOpened():
-            print("❌ Error: Could not open webcam")
+            print("[ERROR] Could not open webcam")
             return
         
         # Start email scheduler in background
         self.start_email_scheduler()
         
         print("\n" + "="*70)
-        print("🎥 WEBCAM FACE RECOGNITION STARTED")
+        print("[WEBCAM] FACE RECOGNITION STARTED")
         print("="*70)
         print("Controls:")
         print("  - Press 'q' to quit")
@@ -292,7 +337,7 @@ class WebcamFaceRecognition:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("❌ Error: Could not read frame")
+                print("[ERROR] Could not read frame")
                 break
             
             frame_count += 1
@@ -330,6 +375,8 @@ class WebcamFaceRecognition:
                         # Mark attendance if high confidence
                         if confidence > self.threshold:
                             self.mark_attendance(person)
+                            # Send to Proteus
+                            self.send_to_proteus(person)
             
             # Display info from database
             today_records = get_today_attendance()
@@ -350,7 +397,7 @@ class WebcamFaceRecognition:
             # Handle key presses
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
-                print("\n👋 Quitting...")
+                print("\n[EXIT] Quitting...")
                 break
             elif key == ord('j'):
                 self.save_attendance('attendance.json', format='json')
@@ -358,10 +405,16 @@ class WebcamFaceRecognition:
                 self.save_attendance('attendance.csv', format='csv')
             elif key == ord('r'):
                 self.marked_today.clear()
-                print("\n🔄 Today's attendance reset")
+                print("\n[RESET] Today's attendance reset")
         
         # Cleanup
         self.stop_email_scheduler()  # Stop the email scheduler thread
+        
+        # Close serial port
+        if self.serial_port and self.serial_port.is_open:
+            self.serial_port.close()
+            print("[SERIAL] Port closed")
+        
         cap.release()
         cv2.destroyAllWindows()
         
@@ -370,19 +423,19 @@ class WebcamFaceRecognition:
         all_records = get_all_attendance()
         
         print("\n" + "="*70)
-        print("📊 SESSION SUMMARY")
+        print("[SESSION SUMMARY]")
         print("="*70)
         print(f"Total people marked today: {len(self.marked_today)}")
         print(f"Total attendance records in database: {len(all_records)}")
         if self.marked_today:
             print(f"People present: {', '.join([p.title() for p in self.marked_today])}")
-        print(f"\n💾 All data saved to database (attendance.db)")
+        print(f"\n[SAVED] All data saved to database (attendance.db)")
         
         # Show email scheduler status
         if EMAIL_AVAILABLE and is_configured():
             config = load_config()
             send_time = config.get('send_time', '17:00')
-            print(f"\n📧 Email scheduler was running")
+            print(f"\n[EMAIL] Email scheduler was running")
             print(f"   Scheduled time: {send_time}")
             print(f"   Emails are sent automatically at the scheduled time")
         print("="*70)
@@ -391,8 +444,11 @@ class WebcamFaceRecognition:
 # Main
 # ============================================================================
 if __name__ == "__main__":
+    # COM2 sends to COM4 (Proteus) via VSPE virtual port pair
     system = WebcamFaceRecognition(
         model_path='./models',
-        threshold=0.65
+        threshold=0.65,
+        com_port='COM2',  # Using COM2 (paired with COM4 in VSPE)
+        baud_rate=9600
     )
     system.run()

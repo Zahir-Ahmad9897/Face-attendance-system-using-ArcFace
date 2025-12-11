@@ -42,3 +42,13 @@ colorama>=0.4.6
 
 # Serial Communication (for Proteus integration)
 pyserial>=3.5
+
+
+# web-requirments
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+python-multipart>=0.0.6
+aiofiles>=23.2.1
+openpyxl>=3.1.0
+

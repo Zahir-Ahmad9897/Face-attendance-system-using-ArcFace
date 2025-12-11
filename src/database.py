@@ -3,14 +3,19 @@ import json
 import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
+from pathlib import Path
 
-DATABASE_FILE = "../data/attendance.db"
-ATTENDANCE_JSON = "../data/attendance.json"
+# Get the project root directory (parent of src)
+SCRIPT_DIR = Path(__file__).parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+DATA_DIR = PROJECT_ROOT / "data"
+
+DATABASE_FILE = str(DATA_DIR / "attendance.db")
+ATTENDANCE_JSON = str(DATA_DIR / "attendance.json")
 
 # Ensure data directory exists
-DATA_DIR = os.path.dirname(DATABASE_FILE)
-if DATA_DIR and not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR, exist_ok=True)
+if not DATA_DIR.exists():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default student list - can be updated
 ALL_STUDENTS = ["Mehran", "Yousaf", "Zahir"]
