@@ -30,7 +30,7 @@ Real-time face detection → ArcFace recognition → Automated attendance markin
 ## Features
 
 ### **Core Capabilities**
-- **Real-time Face Recognition** - ArcFace model with 99%+ accuracy
+- **Real-time Face Recognition** - ArcFace model with 92%+ accuracy
 - **Multi-face Detection** - Process multiple faces simultaneously  
 - **Automated Attendance** - Mark attendance instantly with timestamp
 - **Proteus Hardware Simulation** - Send recognized faces to virtual Arduino/LCD display
